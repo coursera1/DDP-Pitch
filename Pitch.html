@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Developping Data Products:<br/> Interactive Server Graph</title>
+  <meta name="description" content="">
+  <meta name="author" content="PLI">
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="stylesheet" href="libraries/frameworks/revealjs/css/reveal.min.css">
+  <link rel="stylesheet" href="libraries/frameworks/revealjs/css/theme/default.css" id="theme">
+  <link rel="stylesheet" href="libraries/highlighters/highlight.js/css/tomorrow.css" id="theme">
+  <!--[if lt IE 9]>
+  <script src="lib/js/html5shiv.js"></script>
+  <![endif]-->  <link rel="stylesheet" href = "assets/css/mystyle.css">
+
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+      <section class='' data-state='' id='slide-1'>
+  <h2>Shiny: <br/>Interactive Server Graph</h2>
+  <p>This application is used to analyze the results of a monitoring script that runs on different servers in a datacenter. You can find it here: <a href="http://coursera1.shinyapps.io/DDP-shiny">http://coursera1.shinyapps.io/DDP-shiny</a>.</p>
+
+<p>The monitored values are plotted on the Y axis and colored by server names. The size of the dots are proportional to the values to make them more visible for the analysis.</p>
+
+<p>You can play around with the graph tuning parameters:</p>
+
+<ul>
+<li>the date range (to zoom in-out on the x axis), </li>
+<li>the y axis limit (to zoom in-out on the y axis)</li>
+<li>the x axis tick</li>
+</ul>
+
+</section>
+<section class='' data-state='' id='slide-2'>
+  <h2>ui.R</h2>
+  <p>The complete code can be found here: <a href="http://github.com/coursera1/DDP-shiny/blob/master/ui.R">http://github.com/coursera1/DDP-shiny/blob/master/ui.R</a></p>
+
+<p>Here are the descriptions of the inputs and outputs:</p>
+
+<pre><code class="r">fileInput(&quot;serverZip&quot;, &quot;Upload servers Zip file&quot;, multiple=FALSE, accept=&quot;application/zip&quot;),
+fileInput(&quot;eventsCsv&quot;, &quot;Upload events csv file&quot;, multiple=FALSE, accept=&quot;text/csv&quot;),
+dateRangeInput(&quot;dateRange&quot;, &quot;Select date range for graphs&quot;, start=&quot;2014-11-01&quot;),
+sliderInput(&quot;breaks&quot;, &quot;X axis ticks&quot;, 0, 48, 6, 3, round=TRUE),
+sliderInput(&quot;yLimit&quot;, &quot;Y axis limit&quot;, 0, 10, 4, 1, round=TRUE)),
+...
+plotOutput(&quot;G1&quot;),
+h3(&quot;Server Values&quot;),
+dataTableOutput(&quot;serverValue&quot;),
+h3(&quot;Events&quot;),
+dataTableOutput(&quot;tEvents&quot;)
+</code></pre>
+
+</section>
+<section class='' data-state='' id='slide-3'>
+  <h2>server.R</h2>
+  <p>The complete code can be found here: <a href="http://github.com/coursera1/DDP-shiny/blob/master/server.R">http://github.com/coursera1/DDP-shiny/blob/master/server.R</a></p>
+
+<p>Here is the main plotting code:</p>
+
+<pre><code class="r"> qplot(time, sec, data=fData, col=server, geom=&quot;point&quot;, alpha=0.7, size=sec, 
+                              main=&quot;Values for all servers&quot;, xlab=&quot;Time&quot;, ylab=&quot;Value (s)&quot;) +
+                                scale_x_datetime( breaks=xBr, labels = date_format(&quot;%d/%m %Hh&quot;)) +
+                                geom_hline(yintercept=1) +
+                                geom_vline(xintercept=as.numeric(fEvents$time)) +
+                                theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+                                coord_cartesian(ylim = c(0, input$yLimit)) +
+                                theme(legend.position = &quot;none&quot;)
+</code></pre>
+
+</section>
+<section class='' data-state='' id='slide-4'>
+  <h2>Graph generated</h2>
+  <p>This is an example of a generatred graph for some sample data:</p>
+
+<pre><code class="r">qplot(time, sec, data=ndat, col=server, geom=&quot;point&quot;, alpha=0.7, size=sec, 
+      main=&quot;Values for all servers&quot;, xlab=&quot;Time&quot;, ylab=&quot;Values (s)&quot;) +
+    scale_x_datetime( breaks=&quot;48 hour&quot;, labels = date_format(&quot;%d/%m %Hh&quot;)) +
+    geom_hline(yintercept=1) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    coord_cartesian(ylim = c(0, 2)) +
+    theme(legend.position = &quot;none&quot;)
+</code></pre>
+
+<p><img src="assets/fig/unnamed-chunk-4-1.png" alt="plot of chunk unnamed-chunk-4"> </p>
+
+</section>
+<section class='' data-state='' id='slide-5'>
+  <h2>Application screenshot</h2>
+  <p><img  src='./figs/graph.png' /></p>
+
+</section>
+    </div>
+  </div>
+</body>
+  <script src="libraries/frameworks/revealjs/lib/js/head.min.js"></script>
+  <script src="libraries/frameworks/revealjs/js/reveal.min.js"></script>
+  <script>
+  // Full list of configuration options available here:
+  // https://github.com/hakimel/reveal.js#configuration
+  Reveal.initialize({
+    controls: true,
+    progress: true,
+    history: true,
+    center: true,
+    theme: Reveal.getQueryHash().theme || 'default', 
+    transition: Reveal.getQueryHash().transition || 'default', 
+    dependencies: [
+    // Cross-browser shim that fully implements classList -
+    // https://github.com/eligrey/classList.js/
+      { src: 'libraries/frameworks/revealjs/lib/js/classList.js', condition: function() { return !document.body.classList;}},
+      // Zoom in and out with Alt+click
+      { src: 'libraries/frameworks/revealjs/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+      // Speaker notes
+      { src: 'libraries/frameworks/revealjs/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } },
+      // Remote control your reveal.js presentation using a touch device
+      //{ src: 'libraries/frameworks/revealjs/plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
+      ]
+  });
+  </script>  <!-- LOAD HIGHLIGHTER JS FILES -->
+<script src="libraries/highlighters/highlight.js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<!-- DONE LOADING HIGHLIGHTER JS FILES -->
+ 
+
+</html>
