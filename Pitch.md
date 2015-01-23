@@ -60,9 +60,9 @@ Here is the main plotting code:
 ```
 
 ----------------------------------------
-## Graph generated
+## Graph example
 
-This is an example of a generatred graph for some sample data:
+This is an example of a generated graph for some sample data:
 
 
 
